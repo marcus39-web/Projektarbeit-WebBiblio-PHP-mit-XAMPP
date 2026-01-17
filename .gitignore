@@ -1,0 +1,23 @@
+# PHP
+*.log
+*.tmp
+*.cache
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+temp/
+tmp/
+
+# Database files (falls Sie lokale DB-Dateien haben)
+*.sqlite
+*.db
+
+# Vendor (falls Sie Composer verwenden)
+vendor/
