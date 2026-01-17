@@ -1,16 +1,72 @@
 <?php
-// BookSeeder.php
-// Seeder zum Befüllen der Datenbank mit Testdaten
+
+/**
+ * BookSeeder.php
+ * 
+ * Diese Klasse implementiert das Database Seeding Pattern für die WebBiblio-Anwendung.
+ * Sie befüllt die Datenbank mit vordefinierten Testdaten zur Entwicklung und Demonstration.
+ * 
+ * Das Seeding erfolgt über eine statische Methode, die eine kuratierte Liste von
+ * 50 bekannten Büchern aus verschiedenen Genres und Epochen in die Datenbank einträgt.
+ * 
+ * @category Database
+ * @package  WebBiblio
+ * @author   WebBiblio Development Team
+ * @version  1.0.0
+ * @since    2026-01-17
+ */
 
 require_once 'Components/Book.php';
 
+/**
+ * BookSeeder - Klasse zum Befüllen der Datenbank mit Testdaten
+ * 
+ * Diese Seeder-Klasse folgt dem Database Seeding Pattern und wird verwendet,
+ * um die Buchverwaltungsdatenbank mit einer vordefinierten Sammlung von
+ * Büchern zu füllen. Dies ist besonders nützlich für:
+ * 
+ * - Entwicklungstests mit realistischen Daten
+ * - Demonstrationszwecke der Anwendung
+ * - Qualitätssicherung und Funktionstests
+ * - Prototyping und UI-Design-Validierung
+ * 
+ * @category Database
+ * @package  WebBiblio\Components
+ * @author   WebBiblio Development Team
+ * @version  1.0.0
+ */
 class BookSeeder
 {
     /**
-     * Fügt 50 imaginäre Bücher zur Datenbank hinzu
+     * Führt das Database Seeding durch und fügt Testbücher zur Datenbank hinzu
+     * 
+     * Diese Methode implementiert die Hauptfunktionalität des Seeders:
+     * - Lädt eine kuratierte Liste von 50 bekannten Büchern
+     * - Prüft auf bereits vorhandene Duplikate (Titel + Autor)
+     * - Fügt nur neue Bücher hinzu, um Datenintegrität zu gewährleisten
+     * - Protokolliert alle Aktionen mit HTML-Output für Benutzer-Feedback
+     * - Behandelt Fehler graceful mit Exception-Handling
+     * 
+     * Die Buchdaten umfassen verschiedene Genres:
+     * - Klassische Literatur (Tolstoi, Kafka, Shakespeare)
+     * - Science Fiction (Asimov, Herbert, Gibson)
+     * - Fantasy (Tolkien, Lewis, Rowling)
+     * - Krimis (Christie, Doyle, Hammett)
+     * - Moderne Literatur (Morrison, McCarthy)
+     * - Programmierung und Sachbücher (Martin, Marx)
+     * 
+     * @throws Exception Wenn Datenbankverbindung fehlschlägt oder Book-Operationen scheitern
+     * @return void
+     * 
+     * @example
+     * BookSeeder::seed();
+     * 
+     * @since 1.0.0
      */
     public static function seed(): void
     {
+        // Kuratierte Sammlung von 50 Büchern aus verschiedenen Genres und Epochen
+        // Jedes Array-Element: [Titel, Autor, Kategorie, Erscheinungsjahr, Verlag]
         $books = [
             ['Der Herr der Ringe: Die Gefährten', 'J.R.R. Tolkien', 'Fantasy', 1954, 'Klett-Cotta'],
             ['1984', 'George Orwell', 'Dystopie', 1949, 'Secker & Warburg'],
@@ -64,53 +120,83 @@ class BookSeeder
             ['The Road', 'Cormac McCarthy', 'Postapokalyptisch', 2006, 'Alfred A. Knopf']
         ];
 
+        // Zähler für erfolgreich hinzugefügte Bücher
         $count = 0;
+
+        // HTML-Output für Benutzer-Feedback beginnen
         echo "<h2>BookSeeder wird ausgeführt...</h2>";
         echo "<div style='font-family: monospace; background: #f5f5f5; padding: 10px; border-radius: 5px;'>";
 
+        // Iteriere durch alle Bücher und versuche sie zur Datenbank hinzuzufügen
         foreach ($books as $bookData) {
             try {
-                // Prüfen ob Buch bereits existiert
+                // Duplikat-Prüfung: Verhindere doppelte Einträge basierend auf Titel + Autor
+                // Diese Prüfung gewährlesteist Datenintegrität und verhindert versehentliche Duplikate
                 $existingBooks = Book::getAll();
                 $exists = false;
+
+                // Durchsuche alle vorhandenen Bücher nach exakter Titel-Autor-Kombination
                 foreach ($existingBooks as $existing) {
                     if ($existing->getTitle() === $bookData[0] && $existing->getAuthor() === $bookData[1]) {
                         $exists = true;
-                        break;
+                        break; // Frühzeitige Beendigung bei gefundenem Duplikat
                     }
                 }
 
+                // Nur neue Bücher hinzufügen (keine Duplikate)
                 if (!$exists) {
+                    // Neue Book-Instanz mit allen erforderlichen Daten erstellen
+                    // Verwendung des Book-Konstruktors mit parametrisierter Initialisierung
                     $book = new Book(
-                        $bookData[0], // title
-                        $bookData[1], // author
-                        $bookData[2], // category
-                        $bookData[3], // year
-                        $bookData[4]  // publisher
+                        $bookData[0], // title - Buchtitel
+                        $bookData[1], // author - Autor/Autorin
+                        $bookData[2], // category - Literaturgenre/Kategorie
+                        $bookData[3], // year - Erscheinungsjahr (kann null sein für antike Werke)
+                        $bookData[4]  // publisher - Verlagsname
                     );
+
+                    // Buch in Datenbank persistieren über Active Record Pattern
                     $book->save();
-                    $count++;
+                    $count++; // Erfolgszähler incrementieren
+
+                    // Erfolgreiche Erstellung mit XSS-Schutz ausgeben
                     echo "Hinzugefügt: " . htmlspecialchars($bookData[0]) . " von " . htmlspecialchars($bookData[1]) . "<br>";
                 } else {
+                    // Informative Meldung bei bereits vorhandenem Buch
                     echo "Bereits vorhanden: " . htmlspecialchars($bookData[0]) . "<br>";
                 }
             } catch (Exception $e) {
+                // Graceful Error-Handling: Einzelne Fehler sollen nicht gesamten Seeding-Prozess stoppen
+                // Protokolliere Fehler mit Buch-Information und Exception-Details
                 echo "Fehler bei: " . htmlspecialchars($bookData[0]) . " - " . $e->getMessage() . "<br>";
             }
         }
 
+        // HTML-Output abschließen und Zusammenfassung anzeigen
         echo "</div>";
         echo "<br><strong>Seeding abgeschlossen: {$count} neue Bücher hinzugefügt</strong><br>";
         echo "<p><a href='index.php'>Zurück zur Hauptseite</a></p>";
     }
 }
 
-// Wenn Datei direkt aufgerufen wird, Seeding ausführen
+/**
+ * Auto-Execution Block
+ * 
+ * Dieser Block wird nur ausgeführt, wenn die Datei direkt über HTTP aufgerufen wird
+ * (nicht über require/include). Dies ermöglicht sowohl die Verwendung als Klassen-Library
+ * als auch als eigenständiges Seeding-Skript.
+ * 
+ * Pattern: Script-Dual-Mode (Library + Executable)
+ */
 if (basename($_SERVER['PHP_SELF']) === 'BookSeeder.php') {
     echo "<h1>BookSeeder für WebBiblio</h1>";
+
     try {
+        // Hauptseeding-Prozess starten
         BookSeeder::seed();
     } catch (Exception $e) {
+        // Umfassendes Error-Handling mit Benutzer-Hilfestellung
+        // Zeigt häufige Setup-Probleme und deren Lösungen auf
         echo "<div style='color: red; padding: 10px; background: #ffe6e6; border-radius: 5px;'>";
         echo "Fehler beim Seeding: " . htmlspecialchars($e->getMessage());
         echo "<br><br>Stellen Sie sicher, dass:";
