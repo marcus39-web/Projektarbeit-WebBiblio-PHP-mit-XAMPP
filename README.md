@@ -39,7 +39,7 @@ Stellen Sie sicher, dass XAMPP (oder ähnlich) installiert und gestartet ist:
 ```bash
 # Repository klonen oder Dateien kopieren
 cd C:\xampp\htdocs\
-# Projektdateien in 'webbiblio' Ordner kopieren
+# Projektdateien in 'PHP-Projektarbeit-WebBiblio' Ordner kopieren
 ```
 
 ### 3. Datenbank erstellen
@@ -51,21 +51,21 @@ CREATE DATABASE library CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ### 4. Datenbank-Migration ausführen
 Besuchen Sie im Browser:
 ```
-http://localhost/webbiblio/Components/001_create_books_table.php
+http://localhost/PHP-Projektarbeit-WebBiblio/Components/001_create_books_table.php
 ```
 Dies erstellt die `books`-Tabelle automatisch.
 
 ### 5. Testdaten laden (Optional)
 Besuchen Sie im Browser:
 ```
-http://localhost/webbiblio/Components/BookSeeder.php
+http://localhost/PHP-Projektarbeit-WebBiblio/Components/BookSeeder.php
 ```
 Lädt 50 Beispielbücher in die Datenbank.
 
 ### 6. Anwendung starten
 Öffnen Sie im Browser:
 ```
-http://localhost/webbiblio/
+http://localhost/PHP-Projektarbeit-WebBiblio/
 ```
 
 ## Verwendung
@@ -97,7 +97,7 @@ http://localhost/webbiblio/
 ## Projektstruktur
 
 ```
-PHP-Projektarbeit/
+PHP-Projektarbeit-WebBiblio/
 │
 ├── index.php                          # Hauptanwendung (UI + Controller)
 ├── README.md                          # Diese Dokumentation
