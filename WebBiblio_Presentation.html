@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebBiblio - Präsentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 60px;
+            background: white;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide h1 {
+            font-size: 3.5em;
+            color: #333;
+            margin-bottom: 0.5em;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .slide h2 {
+            font-size: 2.8em;
+            color: #667eea;
+            margin-bottom: 1em;
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 0.3em;
+            font-weight: 600;
+        }
+
+        .slide h3 {
+            font-size: 2em;
+            color: #555;
+            margin: 1em 0 0.5em 0;
+            font-weight: 500;
+        }
+
+        .slide p,
+        .slide ul {
+            font-size: 1.5em;
+            line-height: 1.7;
+            color: #444;
+            margin: 0.8em 0;
+        }
+
+        .slide ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .slide ul li {
+            margin: 1em 0;
+            padding-left: 2em;
+            position: relative;
+            font-size: 1.4em;
+        }
+
+        .slide ul li:before {
+            content: "▶";
+            color: #667eea;
+            position: absolute;
+            left: 0;
+            font-size: 1.1em;
+            top: 0.1em;
+        }
+
+        .title-slide {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .title-slide h1 {
+            color: white;
+            font-size: 5em;
+            margin-bottom: 0.3em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .title-slide .subtitle {
+            font-size: 2.2em;
+            margin-bottom: 2em;
+            opacity: 0.9;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 1.2em;
+            overflow-x: auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-left: 6px solid #f39c12;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(90, 103, 216, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn:disabled {
+            background: rgba(108, 117, 125, 0.5);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #667eea;
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
+
+        .schema-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            font-size: 1.3em;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .schema-table th,
+        .schema-table td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .schema-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .schema-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+            transition: transform 0.2s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .logo {
+            font-size: 6em;
+            margin-bottom: 0.2em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="presentation-container">
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">11</span>
+        </div>
+
+        <!-- Folie 1: Titel -->
+        <div class="slide active title-slide">
+            <div class="logo">WebBiblio</div>
+            <div class="subtitle">Einfache Bibliotheksverwaltung</div>
+            <p style="font-size: 1.6em; opacity: 0.8;">PHP-Projektarbeit 2026</p>
+        </div>
+
+        <!-- Folie 2: Projekt-Übersicht -->
+        <div class="slide">
+            <h2>Projekt-Übersicht</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>🌐 Webbasierte Anwendung</h3>
+                    <p>Vollständige PHP-Anwendung zur Buchverwaltung</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔧 CRUD-Operationen</h3>
+                    <p>Create, Read, Update, Delete für alle Bücher</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📱 Responsive Design</h3>
+                    <p>Optimiert für Desktop und Mobile</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🛡️ Sichere Implementierung</h3>
+                    <p>SQL-Injection-Schutz und XSS-Prävention</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Folie 3: Hauptfeatures -->
+        <div class="slide">
+            <h2>Hauptfeatures</h2>
+            <div class="two-column">
+                <div>
+                    <ul>
+                        <li>Bücher hinzufügen, bearbeiten, löschen</li>
+                        <li>Intelligente Filterung nach Autor/Kategorie</li>
+                        <li>Responsive Design für alle Geräte</li>
+                        <li>SQL-Injection-Schutz mit Prepared Statements</li>
+                    </ul>
+                </div>
+                <div>
+                    <ul>
+                        <li>XSS-Prävention mit htmlspecialchars()</li>
+                        <li>50 kuratierte Testdaten inklusive</li>
+                        <li>Moderne Architektur mit Design Patterns</li>
+                        <li>Einfache Installation mit XAMPP</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <strong>Sofort einsatzbereit</strong> - Keine komplizierte Konfiguration erforderlich!
+            </div>
+        </div>
+
+        <!-- Folie 4: Technische Details -->
+        <div class="slide">
+            <h2>Technische Spezifikationen</h2>
+            <div class="two-column">
+                <div>
+                    <h3>Backend-Technologien</h3>
+                    <ul>
+                        <li>PHP 8.0+ mit OOP</li>
+                        <li>MySQL 5.7+ oder MariaDB 10.2+</li>
+                        <li>PDO für sichere Datenbankzugriffe</li>
+                        <li>Apache/Nginx Webserver</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Architektur & Patterns</h3>
+                    <ul>
+                        <li>Singleton Pattern (DatabaseSingleton)</li>
+                        <li>Active Record Pattern (Book-Klasse)</li>
+                        <li>MVC-ähnliche Struktur</li>
+                        <li>InnoDB-Engine für Transaktionen</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Folie 5: Projektstruktur -->
+        <div class="slide">
+            <h2 style="margin-bottom: 0.8em;">Projektstruktur</h2>
+            <div class="feature-grid" style="margin: 20px 0; gap: 20px;">
+                <div class="feature-card" style="padding: 20px;">
+                    <h3 style="font-size: 1.5em; margin-bottom: 0.5em;">📁 Hauptverzeichnis</h3>
+                    <p style="font-size: 1.1em; line-height: 1.4;">
+                        <strong>PHP-Projektarbeit-WebBiblio/</strong><br>
+                        Das Wurzelverzeichnis enthält alle Projektdateien
+                    </p>
+                </div>
+                <div class="feature-card" style="padding: 20px;">
+                    <h3 style="font-size: 1.5em; margin-bottom: 0.5em;">🎯 Hauptdateien</h3>
+                    <ul style="list-style: none; padding: 0; font-size: 1.1em;">
+                        <li style="margin: 0.6em 0; font-size: 1em;">📄 <strong>index.php</strong><br><span
+                                style="color: #666; font-size: 0.9em;">Hauptanwendung (UI + Controller)</span></li>
+                        <li style="margin: 0.6em 0; font-size: 1em;">📖 <strong>README.md</strong><br><span
+                                style="color: #666; font-size: 0.9em;">Vollständige Dokumentation</span></li>
+                    </ul>
+                </div>
+                <div class="feature-card" style="padding: 20px;">
+                    <h3 style="font-size: 1.5em; margin-bottom: 0.5em;">⚙️ Components/ Verzeichnis</h3>
+                    <ul style="list-style: none; padding: 0; font-size: 1.1em;">
+                        <li style="margin: 0.6em 0; font-size: 1em;">🔧 <strong>Book.php</strong><br><span
+                                style="color: #666; font-size: 0.9em;">Book-Entity (Active Record)</span></li>
+                        <li style="margin: 0.6em 0; font-size: 1em;">🔗
+                            <strong>DatabaseSingleton.php</strong><br><span
+                                style="color: #666; font-size: 0.9em;">DB-Verbindung (Singleton)</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="feature-card" style="padding: 20px;">
+                    <h3 style="font-size: 1.5em; margin-bottom: 0.5em;">🛠️ Setup & Daten</h3>
+                    <ul style="list-style: none; padding: 0; font-size: 1.1em;">
+                        <li style="margin: 0.6em 0; font-size: 1em;">📊 <strong>BookSeeder.php</strong><br><span
+                                style="color: #666; font-size: 0.9em;">Testdaten-Generator</span></li>
+                        <li style="margin: 0.6em 0; font-size: 1em;">🗃️
+                            <strong>001_create_books_table.php</strong><br><span
+                                style="color: #666; font-size: 0.9em;">Datenbank-Migration</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <strong>💡 Saubere Architektur:</strong> Klare Trennung von Logik und Darstellung für bessere
+                Wartbarkeit und Erweiterbarkeit
+            </div>
+        </div>
+
+        <!-- Folie 6: Datenbankschema -->
+        <div class="slide">
+            <h2>Datenbankschema</h2>
+            <h3>Tabelle: books (UTF8MB4, InnoDB)</h3>
+            <table class="schema-table">
+                <thead>
+                    <tr>
+                        <th>Spalte</th>
+                        <th>Datentyp</th>
+                        <th>Beschreibung</th>
+                        <th>Eigenschaften</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>id</strong></td>
+                        <td>INT</td>
+                        <td>Eindeutige Buch-ID</td>
+                        <td>Primary Key, Auto Increment</td>
+                    </tr>
+                    <tr>
+                        <td><strong>title</strong></td>
+                        <td>VARCHAR(255)</td>
+                        <td>Buchtitel</td>
+                        <td>Pflichtfeld, NOT NULL</td>
+                    </tr>
+                    <tr>
+                        <td><strong>author</strong></td>
+                        <td>VARCHAR(255)</td>
+                        <td>Autor/Autorin</td>
+                        <td>Pflichtfeld, NOT NULL</td>
+                    </tr>
+                    <tr>
+                        <td><strong>category</strong></td>
+                        <td>VARCHAR(255)</td>
+                        <td>Genre/Kategorie</td>
+                        <td>Pflichtfeld, NOT NULL</td>
+                    </tr>
+                    <tr>
+                        <td><strong>year</strong></td>
+                        <td>YEAR</td>
+                        <td>Erscheinungsjahr</td>
+                        <td>Optional, NULL erlaubt</td>
+                    </tr>
+                    <tr>
+                        <td><strong>publisher</strong></td>
+                        <td>VARCHAR(255)</td>
+                        <td>Verlag</td>
+                        <td>Optional, NULL erlaubt</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Folie 7: Installation -->
+        <div class="slide">
+            <h2>Installation & Setup</h2>
+            <div style="font-size: 1.3em;">
+                <h3>📋 Schritt-für-Schritt Anleitung</h3>
+                <ol style="list-style: decimal; padding-left: 2em;">
+                    <li style="margin: 0.8em 0;"><strong>XAMPP starten</strong> → Apache + MySQL aktivieren</li>
+                    <li style="margin: 0.8em 0;"><strong>Projektdateien kopieren</strong> → nach C:\xampp\htdocs\</li>
+                    <li style="margin: 0.8em 0;"><strong>Datenbank erstellen</strong> → CREATE DATABASE library;</li>
+                    <li style="margin: 0.8em 0;"><strong>Migration ausführen</strong> →
+                        .../Components/001_create_books_table.php</li>
+                    <li style="margin: 0.8em 0;"><strong>Testdaten laden</strong> → .../Components/BookSeeder.php
+                        (optional)</li>
+                    <li style="margin: 0.8em 0;"><strong>Anwendung öffnen</strong> →
+                        http://localhost/PHP-Projektarbeit-WebBiblio/</li>
+                </ol>
+            </div>
+            <div class="highlight-box">
+                <strong>⏱️ Setup-Zeit:</strong> Weniger als 5 Minuten bis zur vollständigen Funktionalität!
+            </div>
+        </div>
+
+        <!-- Folie 8: Sicherheitsfeatures -->
+        <div class="slide">
+            <h2>Sicherheitsfeatures</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>🛡️ SQL-Injection-Schutz</h3>
+                    <p>Alle Datenbankabfragen verwenden <strong>Prepared Statements</strong> für maximale Sicherheit</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔒 XSS-Prävention</h3>
+                    <p>Alle Ausgaben werden mit <strong>htmlspecialchars()</strong> gegen Cross-Site-Scripting geschützt
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <h3>✅ Input-Validierung</h3>
+                    <p><strong>Server- und clientseitige</strong> Validierung aller Formulareingaben</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🛠️ Fehlerbehandlung</h3>
+                    <p><strong>Graceful Error-Handling</strong> ohne Preisgabe sensibler Systemdaten</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Folie 9: API-Beispiele -->
+        <div class="slide">
+            <h2>Book-Klasse API</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>🔍 Daten Lesen</h3>
+                    <div
+                        style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 1.1em;">
+                        <strong style="color: #28a745;">// Einzelnes Buch laden</strong><br>
+                        $book = Book::get(42);<br><br>
+                        <strong style="color: #28a745;">// Alle Bücher abrufen</strong><br>
+                        $books = Book::getAll();
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3>🔎 Filtern & Suchen</h3>
+                    <div
+                        style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 1.1em;">
+                        <strong style="color: #17a2b8;">// Nach Autor filtern</strong><br>
+                        $books = Book::getByAuthor('Tolkien');<br><br>
+                        <strong style="color: #17a2b8;">// Nach Kategorie suchen</strong><br>
+                        $books = Book::getByCategory('Fantasy');
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3>➕ Erstellen & Speichern</h3>
+                    <div
+                        style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 1.1em;">
+                        <strong style="color: #007bff;">// Neues Buch erstellen</strong><br>
+                        $book = new Book('Titel',<br>
+                        &nbsp;&nbsp;'Autor', 'Kategorie');<br><br>
+                        <strong style="color: #007bff;">// Speichern</strong><br>
+                        $book->save();
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3>✏️ Bearbeiten & Löschen</h3>
+                    <div
+                        style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 1.1em;">
+                        <strong style="color: #fd7e14;">// Buch aktualisieren</strong><br>
+                        $book->setTitle('Neuer Titel');<br>
+                        $book->save();<br><br>
+                        <strong style="color: #dc3545;">// Buch löschen</strong><br>
+                        $book->delete();
+                    </div>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <strong>🚀 Intuitive API:</strong> Einfache Methoden für komplexe Datenbankoperationen - Active Record
+                Pattern macht CRUD-Operationen kinderleicht!
+            </div>
+        </div>
+
+        <!-- Folie 10: Testdaten -->
+        <div class="slide">
+            <h2>Testdaten & Beispiel-Content</h2>
+            <div class="two-column">
+                <div>
+                    <h3>📚 50 kuratierte Beispielbücher</h3>
+                    <ul>
+                        <li><strong>Klassische Literatur:</strong><br>Tolstoi, Kafka, Shakespeare, Goethe</li>
+                        <li><strong>Science Fiction:</strong><br>Isaac Asimov, Frank Herbert, William Gibson</li>
+                        <li><strong>Fantasy:</strong><br>J.R.R. Tolkien, C.S. Lewis, J.K. Rowling</li>
+                    </ul>
+                </div>
+                <div>
+                    <ul>
+                        <li><strong>Krimis & Thriller:</strong><br>Agatha Christie, Arthur Conan Doyle</li>
+                        <li><strong>Moderne Literatur:</strong><br>Toni Morrison, Cormac McCarthy</li>
+                        <li><strong>Sachbücher:</strong><br>Programmierung, Philosophie, Wissenschaft</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <strong>🚀 Sofortige Funktionalität:</strong> Alle Features sind nach dem Setup direkt testbar!
+            </div>
+        </div>
+
+        <!-- Folie 11: Fazit -->
+        <div class="slide">
+            <h2>WebBiblio - Fazit & Vorteile</h2>
+            <div class="feature-grid" style="grid-template-columns: 1fr;">
+                <div class="feature-card" style="text-align: center; padding: 40px;">
+                    <h3 style="font-size: 2.2em; margin-bottom: 1em;">Was macht WebBiblio besonders?</h3>
+                    <div style="font-size: 1.4em; line-height: 2;">
+                        <p>✅ <strong>Vollständige Bibliotheksverwaltung</strong> out-of-the-box</p>
+                        <p>✅ <strong>Moderne PHP-Entwicklungspraktiken</strong> demonstriert</p>
+                        <p>✅ <strong>Sichere und saubere Implementierung</strong></p>
+                        <p>✅ <strong>Benutzerfreundliche und intuitive Oberfläche</strong></p>
+                        <p>✅ <strong>Sofort einsatzbereit</strong> mit umfangreichen Testdaten</p>
+                        <p>✅ <strong>Responsive Design</strong> für alle Geräte</p>
+                        <p>✅ <strong>Erweiterbar und wartbar</strong> durch gute Architektur</p>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; font-size: 2.5em; margin-top: 50px; color: #667eea; font-weight: 700;">
+                WebBiblio - Ihre einfache und sichere Lösung<br>
+                für moderne digitale Buchverwaltung!
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="previousSlide()">◀ Zurück</button>
+        <button class="nav-btn" id="nextBtn" onclick="nextSlide()">Weiter ▶</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        // Initialisierung
+        document.getElementById('totalSlides').textContent = totalSlides;
+        updateSlideDisplay();
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            updateSlideDisplay();
+        }
+
+        function updateSlideDisplay() {
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+
+            // Progress Bar
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        // Tastaturnavigation
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                previousSlide();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                showSlide(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                showSlide(totalSlides - 1);
+            }
+        });
+
+        // Touch/Swipe Support für Mobile
+        let startX = null;
+        let startY = null;
+
+        document.addEventListener('touchstart', function (e) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', function (e) {
+            if (!startX || !startY) return;
+
+            let endX = e.changedTouches[0].clientX;
+            let endY = e.changedTouches[0].clientY;
+
+            let diffX = startX - endX;
+            let diffY = startY - endY;
+
+            // Horizontal swipe is more significant than vertical
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextSlide(); // Swipe left - next slide
+                } else {
+                    previousSlide(); // Swipe right - previous slide
+                }
+            }
+
+            startX = null;
+            startY = null;
+        });
+
+        // Presentation mode (F11)
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'F11') {
+                e.preventDefault();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        // Initial setup
+        updateSlideDisplay();
+    </script>
+</body>
+
+</html>
